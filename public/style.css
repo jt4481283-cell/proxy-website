@@ -1,0 +1,49 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #10131d;
+  color: #f3f5ff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #252c49, #10131d);
+}
+
+h1 { font-size: clamp(2rem, 6vw, 4rem); }
+
+h2 { margin-top: 2rem; }
+
+input, button {
+  padding: 0.7rem;
+  border: 1px solid #ffffff30;
+  border-radius: 8px;
+  color: #fff;
+  background: #10131d;
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: #596ee8;
+  border: 0;
+}
+
+form { display: flex; gap: 0.5rem; }
+
+audio { width: min(100%, 600px); }
+
+#chat-messages,
+#fred-messages {
+  min-height: 120px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #10131d;
+}
