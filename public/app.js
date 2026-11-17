@@ -37,7 +37,7 @@ socket.on('chat:message', message => {
 });
 
 document.querySelector('#chat-form').addEventListener('submit', event => {
-  event.preventEvent();
+  event.preventDefault();
   const name = document.querySelector('#chat-name').value.trim();
   const text = document.querySelector('#chat-text').value.trim();
 
