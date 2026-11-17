@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Hub</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <h1>Welcome to My Hub</h1>
+
+  <h2 id="music">Music</h2>
+  <ul id="playlist"></ul>
+  <audio id="audio-player" controls></audio>
+
+  <h2 id="chat">Global Chat</h2>
+  <div id="chat-messages"></div>
+  <form id="chat-form">
+    <input id="chat-name" placeholder="Your name" maxlength="24" required>
+    <input id="chat-text" placeholder="Message" maxlength="500" required>
+    <button type="submit">Send</button>
+  </form>
+
+  <h2 id="fred">Ask Fred</h2>
+  <div id="fred-messages"></div>
+  <form id="fred-form">
+    <input id="fred-prompt" placeholder="Ask Fred" maxlength="4000" required>
+    <button type="submit">Ask</button>
+  </form>
+  <p id="fred-status"></p>
+</body>
+</html>
