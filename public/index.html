@@ -3,32 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10131d">
   <title>My Hub</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/socket.io/socket.io.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <h1>Welcome to My Hub</h1>
+  <aside class="sidebar">
+    <a class="brand" href="#home"><span class="brand-mark">H</span><span>My Hub<small>Your space, your way</small></span></a>
+    <p class="nav-label">YOUR HUB</p>
+    <nav aria-label="Main navigation">
+      <a class="nav-link active" href="#home"><span>⌂</span> Home</a>
+      <a class="nav-link" href="#games"><span>▣</span> Games <b>40+</b></a>
+      <a class="nav-link" href="#music"><span>♫</span> Music</a>
+      <a class="nav-link" href="#chat"><span>◉</span> Global Chat</a>
+      <a class="nav-link" href="#fred"><span>✦</span> Ask Fred</a>
+      <a class="nav-link" href="#web"><span>⌕</span> Web Search</a>
+    </nav>
+    <div class="sidebar-note"><span class="status-dot"></span> Your hub is ready<br><small>Pick a section to get started</small></div>
+  </aside>
 
-  <h2 id="music">Music</h2>
-  <ul id="playlist"></ul>
-  <audio id="audio-player" controls></audio>
+  <main class="main-content" id="home">
+    <header class="topbar"><span>MY HUB <span class="slash">/</span> HOME</span><span class="topbar-pill">A little corner of the internet</span></header>
+    <section class="welcome panel">
+      <div><p class="eyebrow">WELCOME TO YOUR SPACE</p><h1>Everything in<br><span>one place.</span></h1><p class="welcome-copy">Choose a section from the sidebar and make yourself at home.</p><a class="primary-link" href="#games">Explore games <span>→</span></a></div>
+      <div class="welcome-art" aria-hidden="true"><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="art-window"><span></span><span></span><span></span><div>✦</div></div></div>
+    </section>
 
-  <h2 id="chat">Global Chat</h2>
-  <div id="chat-messages"></div>
-  <form id="chat-form">
-    <input id="chat-name" placeholder="Your name" maxlength="24" required>
-    <input id="chat-text" placeholder="Message" maxlength="500" required>
-    <button type="submit">Send</button>
-  </form>
+    <section class="section-block" id="games">
+      <div class="section-heading"><div><p class="eyebrow">TAKE A BREAK</p><h2>Game library</h2><p class="muted">Browse 40+ games. Select one to find a playable version online.</p></div><span class="count-badge">40+ GAMES</span></div>
+      <div class="game-toolbar"><label class="search-box"><span>⌕</span><input id="game-search" type="search" placeholder="Find a game…" aria-label="Search games"></label><span id="game-count" class="muted"></span></div>
+      <div id="game-grid" class="game-grid" aria-live="polite"></div>
+    </section>
 
-  <h2 id="fred">Ask Fred</h2>
-  <div id="fred-messages"></div>
-  <form id="fred-form">
-    <input id="fred-prompt" placeholder="Ask Fred" maxlength="4000" required>
-    <button type="submit">Ask</button>
-  </form>
-  <p id="fred-status"></p>
+    <section class="section-block" id="music">
+      <div class="section-heading"><div><p class="eyebrow">SOUNDTRACK YOUR DAY</p><h2>Music</h2><p class="muted">Choose audio files from your device to play them here.</p></div><span class="section-icon">♫</span></div>
+      <div class="music-panel panel"><div class="music-disc">♫</div><div class="music-controls"><label class="upload-button" for="music-files">＋ Add music files</label><input id="music-files" type="file" accept="audio/*,.mp3,.m4a,.ogg,.wav" multiple hidden><p id="music-status" class="muted">No tracks added yet. Your files stay on your device.</p><ul id="playlist" class="playlist"></ul><audio id="audio-player" controls preload="metadata"></audio></div></div>
+    </section>
+
+    <section class="section-block" id="chat">
+      <div class="section-heading"><div><p class="eyebrow">SAY HELLO</p><h2>Global Chat</h2><p class="muted">Messages are shared with people connected to this site.</p></div><span class="live-badge"><span class="status-dot"></span> LIVE</span></div>
+      <div class="panel chat-panel"><div id="chat-messages" class="message-list" aria-live="polite"><p class="empty-state">No messages yet. Start the conversation!</p></div><form id="chat-form" class="form-row"><input id="chat-name" placeholder="Your name" maxlength="24" required aria-label="Your name"><input id="chat-text" placeholder="Write a message…" maxlength="500" required aria-label="Message"><button type="submit">Send <span>→</span></button></form></div>
+    </section>
+
+    <section class="section-block" id="fred">
+      <div class="section-heading"><div><p class="eyebrow">YOUR AI COMPANION</p><h2>Ask Fred</h2><p class="muted">Ask a question or just say hello.</p></div><span class="section-icon sparkle">✦</span></div>
+      <div class="panel fred-panel"><div id="fred-messages" class="message-list" aria-live="polite"><p class="empty-state">Hey! I'm Fred. What would you like to talk about?</p></div><form id="fred-form" class="form-row"><input id="fred-prompt" placeholder="Message Fred…" maxlength="4000" required aria-label="Message Fred"><button type="submit">Ask Fred <span>→</span></button></form><p id="fred-status" class="form-status" role="status"></p></div>
+    </section>
+
+    <section class="section-block" id="web">
+      <div class="section-heading"><div><p class="eyebrow">OUT THERE ON THE WEB</p><h2>Web search</h2><p class="muted">Search opens results in a new tab. Some sites don't allow themselves to be embedded inside other pages.</p></div><span class="section-icon">⌕</span></div>
+      <form id="web-search-form" class="panel web-search"><span>⌕</span><input id="web-search-input" type="search" placeholder="Search the web…" required aria-label="Search the web"><button type="submit">Search <span>→</span></button></form>
+    </section>
+    <footer>Made for your corner of the internet <span>✦</span></footer>
+  </main>
 </body>
 </html>
