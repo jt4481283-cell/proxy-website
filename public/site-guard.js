@@ -1,5 +1,5 @@
 (() => {
-  // Prevent legacy Google links/popups and search-result links from navigating away.
+  // Keep navigation and game/search actions on this site, even when older cached scripts run.
   const notice = document.createElement('div');
   notice.className = 'site-stay-notice';
   notice.setAttribute('role', 'status');
@@ -8,16 +8,16 @@
   let noticeTimer;
 
   function showNotice() {
-    notice.textContent = 'You are staying on this site. Search results show previews here; external pages are not opened.';
+    notice.textContent = 'Search results stay here. External pages are not opened.';
     notice.classList.add('visible');
     clearTimeout(noticeTimer);
     noticeTimer = setTimeout(() => notice.classList.remove('visible'), 3500);
   }
 
-  // Block old scripts that try to open Google in a new tab.
+  // Block legacy scripts that open Google in a new tab.
   window.open = () => { showNotice(); return null; };
 
-  // Capture before the browser follows any link, including links added later by scripts.
+  // Do not follow external search-result links. Capture before browser navigation occurs.
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href]');
     if (!link) return;
@@ -30,7 +30,6 @@
     }
   }, true);
 
-  // Make same-site behavior explicit for the web search section.
-  const description = document.querySelector('#web .section-heading .muted');
-  if (description) description.textContent = 'Search DuckDuckGo and read result previews here. External pages are not opened.';
+  const searchDescription = document.querySelector('#web .section-heading .muted');
+  if (searchDescription) searchDescription.textContent = 'Search here for DuckDuckGo results, with a Wikipedia fallback if DuckDuckGo is unavailable. Results stay on this site.';
 })();
