@@ -11,30 +11,22 @@ const io = new Server(server);
 
 app.use(express.json({ limit: '10kb' }));
 
-// Keep the enhancements on the existing dashboard without changing its layout.
+// Ensure the built-in games/search enhancements are actually loaded by the live page.
 app.get('/', async (req, res, next) => {
   try {
     const html = await fs.readFile(path.join(__dirname, 'public', 'index.html'), 'utf8');
-    const additions = '<link rel="stylesheet" href="/enhancements.css"><script src="/enhancements.js" defer></script>';
-    res.type('html').send(html.replace('</head>', `${additions}</head>`));
+    const additions = '<link rel="stylesheet" href="/enhancements.css?v=2"><script src="/enhancements.js?v=2" defer></script><script src="/site-guard.js?v=2" defer></script>';
+    res.set('Cache-Control', 'no-store').type('html').send(html.replace('</head>', `${additions}</head>`));
   } catch (error) {
     next(error);
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { etag: false, maxAge: 0 }));
 
 const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 10 });
 const searchLimiter = rateLimit({ windowMs: 60 * 1000, max: 20 });
 
-app.get('/api/music', (req, res) => {
-  res.json([
-    { id: 'song1', title: 'Song 1', src: '/music/song1.mp3' },
-    { id: 'song2', title: 'Song 2', src: '/music/song2.mp3' }
-  ]);
-});
-
-// Free, rule-based Fred: no API key or paid AI service required.
 app.post('/api/ai', aiLimiter, (req, res) => {
   const prompt = typeof req.body.prompt === 'string' ? req.body.prompt.trim() : '';
   if (!prompt || prompt.length > 4000) {
@@ -46,22 +38,22 @@ app.post('/api/ai', aiLimiter, (req, res) => {
   if (/\b(hi|hello|hey|what'?s up)\b/.test(text)) {
     reply = 'Hey! I’m Fred, your free built-in helper. I can chat, share simple ideas, or help you find a section of the site.';
   } else if (/\b(game|play|games)\b/.test(text)) {
-    reply = 'Head to the Games section to play the built-in games. Pick one and it opens right here on the site.';
+    reply = 'Head to Games to play one of the built-in games right here on this site.';
   } else if (/\b(music|song|audio)\b/.test(text)) {
-    reply = 'Open Music and choose audio files from your device. They play in the site and are not uploaded.';
+    reply = 'Open Music and choose audio files from your device. They play here and are not uploaded.';
   } else if (/\b(search|duckduckgo|web|internet)\b/.test(text)) {
-    reply = 'Use Web Search to see DuckDuckGo results here. Opening a result takes you to that website.';
+    reply = 'Use Web Search to see DuckDuckGo results here. Search results will not take you away from this site.';
   } else if (/\b(help|what can you do)\b/.test(text)) {
-    reply = 'I’m a simple, free helper—not a full AI. I can point you to Games, Music, Global Chat, and Web Search.';
+    reply = 'I’m a simple free helper, not a full AI. I can point you to Games, Music, Global Chat, and Web Search.';
   } else if (/\b(thank|thanks)\b/.test(text)) {
     reply = 'You’re welcome! Have fun exploring your hub.';
   } else {
-    reply = 'I’m the free version of Fred, so I can only answer a few common questions. Try asking about games, music, search, or how to use the site.';
+    reply = 'I’m the free version of Fred, so I can answer a few common questions. Try asking about games, music, search, or how to use the site.';
   }
   res.json({ reply });
 });
 
-// Fetch and render DuckDuckGo's public HTML results as same-site JSON.
+// Return search snippets on this site's own page. External result links are blocked client-side.
 app.get('/api/search', searchLimiter, async (req, res) => {
   const query = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 200) : '';
   if (!query) return res.status(400).json({ error: 'Enter something to search for.' });
@@ -79,19 +71,18 @@ app.get('/api/search', searchLimiter, async (req, res) => {
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
       .replace(/\s+/g, ' ').trim();
     const results = [];
-    const resultPattern = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    const pattern = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
     let match;
-    while ((match = resultPattern.exec(html)) && results.length < 10) {
-      let href = decode(match[1]);
+    while ((match = pattern.exec(html)) && results.length < 10) {
       try {
-        const parsed = new URL(href, 'https://duckduckgo.com');
-        href = parsed.searchParams.get('uddg') || parsed.href;
-        if (!/^https?:\/\//i.test(href)) continue;
-        const snippetStart = resultPattern.lastIndex;
-        const snippetHtml = html.slice(snippetStart, snippetStart + 1800).match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i);
-        results.push({ title: decode(match[2]), url: href, snippet: snippetHtml ? decode(snippetHtml[1]) : '' });
+        const parsed = new URL(decode(match[1]), 'https://duckduckgo.com');
+        const target = parsed.searchParams.get('uddg') || parsed.href;
+        if (!/^https?:\/\//i.test(target)) continue;
+        const following = html.slice(pattern.lastIndex, pattern.lastIndex + 1800);
+        const snippetMatch = following.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/i);
+        results.push({ title: decode(match[2]), url: target, snippet: snippetMatch ? decode(snippetMatch[1]) : '' });
       } catch (_) {
-        // Ignore malformed search-result URLs.
+        // Skip malformed result URLs.
       }
     }
     res.json({ results });
@@ -101,8 +92,6 @@ app.get('/api/search', searchLimiter, async (req, res) => {
   }
 });
 
-// This chat broadcasts messages from people connected to your site.
-// Fred is not connected to the chat.
 io.on('connection', socket => {
   socket.on('chat:message', payload => {
     const name = typeof payload?.name === 'string' ? payload.name.trim().slice(0, 24) : '';
