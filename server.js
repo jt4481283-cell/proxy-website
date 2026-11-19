@@ -16,7 +16,7 @@ app.use(express.json({ limit: '10kb' }));
 app.get('/', async (req, res, next) => {
   try {
     const html = await fs.readFile(path.join(__dirname, 'public', 'index.html'), 'utf8');
-    const additions = '<link rel="stylesheet" href="/enhancements.css?v=3"><script src="/enhancements.js?v=3" defer></script><script src="/site-guard.js?v=3" defer></script>';
+    const additions = '<link rel="stylesheet" href="/enhancements.css?v=3"><script src="/enhancements.js?v=3" defer></script><script src="/site-guard.js?v=3" defer></script><script src="/arena-games.js?v=1" defer></script>';
     res.set('Cache-Control', 'no-store').type('html').send(html.replace('</head>', `${additions}</head>`));
   } catch (error) {
     next(error);
